@@ -1,0 +1,2 @@
+# -DepEd-Staff-Insight-Workforce-Analytics-Dashboard-
+The Core Objectives (Matching the JD)Trend Tracking &amp; Benchmarking: Monitor staff counts, retention rates, and leave patterns.  Diversity &amp; Wellbeing: Track equity targets (e.g., gender balance, Indigenous representation, age distribution).  Supply &amp; Recruitment: Model future workforce gaps (e.g., retirement risk vs. incoming graduate supply).  
