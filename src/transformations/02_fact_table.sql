@@ -15,10 +15,11 @@ CREATE TABLE Fact_Workforce_Snapshot (
     -- Links to Dim_School_District
     Employment_Type VARCHAR(50),
     -- Permanent Full-Time, Casual, etc.
+    Status VARCHAR(20),
+    -- Active, Terminated, 
     FTE DECIMAL(3, 2),
     -- Full-Time Equivalent fraction (e.g., 1.00, 0.60)
-    Headcount INT DEFAULT 1,
-    -- Multi-dimensional aggregation baseline
+    Headcount INT DEFAULT 1, -- Multi-dimensional aggregation baseline
     -- Foreign Key Constraints to ensure 100% Referential Integrity
     CONSTRAINT fk_fact_date FOREIGN KEY (Date_Key) REFERENCES Dim_Date(Date_Key),
     CONSTRAINT fk_fact_employee FOREIGN KEY (Employee_Key) REFERENCES Dim_Employee(Employee_Key),
@@ -32,6 +33,7 @@ INSERT INTO Fact_Workforce_Snapshot (
         Employee_Key,
         District_Key,
         Employment_Type,
+        Status,
         FTE,
         Headcount
     )
@@ -40,6 +42,7 @@ SELECT DISTINCT d.Date_Key,
     sd.District_Key,
     raw.EmploymentType,
     -- Fixed: Refactored from Employment_Type to match Python data frame
+    raw.status,
     raw.FTE,
     1 AS Headcount
 FROM staging_raw_hr_data raw -- Fixed: Pointed to the correct landing pad name
