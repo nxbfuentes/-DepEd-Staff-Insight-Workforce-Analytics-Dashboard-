@@ -1,47 +1,48 @@
 -- ====================================================================
 -- PROJECT: EduStaff Insight (WA Department of Education)
 -- SCRIPT: 01_dim_tables.sql
--- PURPOSE: Build Dimensions for Demographics, Districts, and Time
+-- PURPOSE: Build Dimensions tailored to Python Data Generator Fields
 -- TARGET CRITERIA: Selection Criteria #1 (Data Modelling) & #5 (Data Management)
 -- ====================================================================
 
 -- 1. Create Regional Schooling Districts Dimension
 CREATE TABLE Dim_School_District (
     District_Key INT PRIMARY KEY,
-    School_Name VARCHAR(100),
-    Regional_District VARCHAR(100) -- e.g., Pilbara, Kimberley, Metro
+    WA_Region VARCHAR(100) NOT NULL UNIQUE
 );
 
-INSERT INTO Dim_School_District (District_Key, School_Name, Regional_District)
-SELECT DISTINCT 
-    DENSE_RANK() OVER (ORDER BY School_Name, Regional_District) AS District_Key,
-    School_Name,
-    Regional_District
-FROM Staging_Raw_HR_Data;
+-- Populating from the exact 'WARegion' field output by Python
+INSERT INTO Dim_School_District (District_Key, WA_Region)
+SELECT 
+    DENSE_RANK() OVER (ORDER BY WARegion) AS District_Key,
+    WARegion
+FROM staging_raw_hr_data srhd 
+GROUP BY WARegion;
 
 
 -- 2. Create Employee Profile Dimension (Capturing Equity and Demographics)
 CREATE TABLE Dim_Employee (
     Employee_Key INT PRIMARY KEY,
-    Employee_ID VARCHAR(20),
-    Role_Title VARCHAR(100), -- Teacher, Principal, Admin
+    Employee_ID VARCHAR(20) NOT NULL,
+    Role_Title VARCHAR(100),       -- Teacher, Principal, Admin, etc.
     Gender VARCHAR(20),
     Indigenous_Identity VARCHAR(5), -- Yes/No
     Disability_Status VARCHAR(5),   -- Yes/No
     Birth_Year INT
 );
 
+-- Populating from your precise Python array column names
 INSERT INTO Dim_Employee (Employee_Key, Employee_ID, Role_Title, Gender, Indigenous_Identity, Disability_Status, Birth_Year)
 SELECT DISTINCT
-    DENSE_RANK() OVER (ORDER BY Employee_ID) AS Employee_Key,
-    Employee_ID,
-    Role_Title,
+    DENSE_RANK() OVER (ORDER BY EmployeeID) AS Employee_Key,
+    EmployeeID,
+    Role,
     Gender,
-    Indigenous_Identity,
-    Disability_Status,
-    -- FIX: Anchored to 2026 to guarantee unchanging workforce telemetry history
+    IndigenousIdentity,
+    DisabilityStatus,
+    -- Anchored to 2026 to keep workforce telemetry stable over time
     2026 - Age AS Birth_Year 
-FROM Staging_Raw_HR_Data;
+FROM staging_raw_hr_data srhd ;
 
 
 -- 3. Create Calendar Dimension for Workforce Trend Tracking
